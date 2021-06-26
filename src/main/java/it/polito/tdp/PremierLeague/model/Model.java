@@ -1,5 +1,6 @@
 package it.polito.tdp.PremierLeague.model;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -19,9 +20,13 @@ public class Model {
 	private Graph<Player, DefaultWeightedEdge> grafo;
 	private Map<Integer, Player> idMap;
 	private TopPlayer topPlayer;
+	private List<Player> soluzioneMigliore;
+	private int titolaritaMigliore;
+	
 	
 	public Model() {
 		dao = new PremierLeagueDAO();
+		topPlayer = null;
 	}
 	
 	public void creaGrafo(double x) {
@@ -54,7 +59,6 @@ public class Model {
 			return null;
 		
 		Player best = null;
-		topPlayer = null;
 		Integer maxAvvBattuti = Integer.MIN_VALUE;
 		
 		for(Player p: grafo.vertexSet()) {
@@ -81,4 +85,65 @@ public class Model {
 		Collections.sort(result);
 		return result;
 	}
+	
+	public int calcolaTitolaritaGiocatore(Player giocatore) {
+		int titolarita = 0;
+		
+		int pesoUscente = 0;
+		for(DefaultWeightedEdge edge: this.grafo.outgoingEdgesOf(giocatore)) {
+			pesoUscente += this.grafo.getEdgeWeight(edge);
+		}
+		
+		int pesoEntrante = 0;
+		for(DefaultWeightedEdge edge: this.grafo.incomingEdgesOf(giocatore)) {
+			pesoEntrante += this.grafo.getEdgeWeight(edge);
+		}
+		
+		titolarita = pesoUscente - pesoEntrante;
+		return titolarita;
+	}
+	
+	public int calcolaTitolaritaTeam(List<Player> parziale) {
+		int titolarita = 0;
+		for(Player p: parziale) {
+			titolarita += this.calcolaTitolaritaGiocatore(p);
+		}
+		return titolarita; 
+	}
+	
+	
+	public List<Player> dreamTeam(int k) {
+		this.soluzioneMigliore = null;
+		this.titolaritaMigliore = 0;
+		List<Player> parziale = new ArrayList<>();
+		List<Player> giocatori = new ArrayList<>(this.grafo.vertexSet());
+		cerca(parziale, giocatori, k);
+		
+		return soluzioneMigliore;
+		
+	}
+	
+	public void cerca(List<Player> parziale, List<Player> tuttiIGiocatori, int k) {
+		if(parziale.size() == k) {
+			if(calcolaTitolaritaTeam(parziale) > titolaritaMigliore) {
+				soluzioneMigliore = new ArrayList<>(parziale);
+				titolaritaMigliore = calcolaTitolaritaTeam(parziale);
+			}
+			return;
+		}
+		
+		for(Player p: tuttiIGiocatori) {
+			if(!parziale.contains(p)) {
+				parziale.add(p);
+				List<Player> rimasti = new ArrayList<>(tuttiIGiocatori);
+				rimasti.removeAll(Graphs.successorListOf(this.grafo, p));
+				cerca(parziale, rimasti, k);
+				parziale.remove(p);
+			}
+		}
+		
+		
+	}
+	
+	
 }

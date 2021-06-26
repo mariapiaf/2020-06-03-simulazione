@@ -9,6 +9,7 @@ import java.util.ResourceBundle;
 
 import it.polito.tdp.PremierLeague.model.GiocatoriBattuti;
 import it.polito.tdp.PremierLeague.model.Model;
+import it.polito.tdp.PremierLeague.model.Player;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -68,7 +69,19 @@ public class FXMLController {
 
     @FXML
     void doDreamTeam(ActionEvent event) {
-
+    	txtResult.clear();
+    	String sk = txtK.getText();
+    	int k = 0;
+    	try {
+    		k = Integer.parseInt(sk);
+    	} catch(NumberFormatException nfe) {
+    		txtResult.appendText("Devi inserire un numero intero!");
+    		return;
+    	}
+    	txtResult.appendText("Dream team: \n");
+    	for(Player p: this.model.dreamTeam(k)) {
+    		txtResult.appendText(p.toString()+"\n");
+    	}
     }
 
     @FXML
