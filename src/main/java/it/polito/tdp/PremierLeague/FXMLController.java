@@ -7,6 +7,7 @@ package it.polito.tdp.PremierLeague;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.PremierLeague.model.GiocatoriBattuti;
 import it.polito.tdp.PremierLeague.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -45,6 +46,24 @@ public class FXMLController {
     @FXML
     void doCreaGrafo(ActionEvent event) {
 
+    	txtResult.clear();
+    	String sgoals = txtGoals.getText();
+    	double goals = -1;
+    	try {
+    		goals = Double.parseDouble(sgoals);
+    		if(goals < 0) {
+    			txtResult.appendText("Inserisci un numero maggiore di 0!");
+    			return;
+    		}
+    	} catch(NumberFormatException nfe) {
+    		txtResult.appendText("Devi inserire un numero!");
+    		return;
+    	}
+    	
+    	this.model.creaGrafo(goals);
+    	txtResult.appendText("GRAFO CREATO! \n");
+    	txtResult.appendText("# VERTICI: " + this.model.nVertici()+"\n");
+    	txtResult.appendText("# ARCHI: " + this.model.nArchi()+"\n");
     }
 
     @FXML
@@ -55,6 +74,11 @@ public class FXMLController {
     @FXML
     void doTopPlayer(ActionEvent event) {
 
+    	txtResult.clear();
+    	txtResult.appendText("Top Player: " + this.model.topPlayer().toString()+ "\n");
+    	for(GiocatoriBattuti gb: this.model.giocatoriBattutiDaTopPlayer()) {
+    		txtResult.appendText(gb.toString()+"\n");
+    	}
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
